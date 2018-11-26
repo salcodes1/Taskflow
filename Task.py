@@ -8,8 +8,10 @@ class ArgumentNotProvidedException(Exception):
 
 class Task:
 
+    __slots__ = ('commands', 'default_values')
+
     def __init__(self, commands, default_values):
-        self.__commands__ = commands
+        self.commands = commands
         self.default_values = default_values
 
     # parseandreplace
@@ -17,7 +19,7 @@ class Task:
     # string = the string which will be parsed
     # dt = dictionary providing arguments and their value
 
-    def parseandreplace(self, string, dt={}):
+    def parseandreplace(self, string: str, dt: dict) -> str:
         i = 0
         while i < len(string):
             if string[i] == '$' and string[i + 1] == '$':
@@ -40,11 +42,11 @@ class Task:
     # executes command sequence
     # dt = dictionary providing arguments and their value
 
-    def execute(self, dt):
+    def execute(self, dt: dict) -> None:
         sstr = ""
 
         p = Popen("/bin/sh", stdin=PIPE)
-        for i in self.__commands__:
+        for i in self.commands:
             sstr += self.parseandreplace(i, dt) + " && "
 
         sstr = sstr[::-1].replace(" && ", "", 1)[::-1]
@@ -55,8 +57,14 @@ class Task:
         else:
             return ""
 
-    def append(self, string):
-        self.__commands__.append(string)
+    def append(self, string: str) -> None:
+        self.commands.append(string)
 
-    def delete(self, string):
-        del self.__commands__[self.__commands__.index(string)]
+    def findanddelete(self, string: str) -> None:
+        del self.commands[self.commands.index(string)]
+
+    def delete(self, index: int) -> None:
+        if index < len(self.commands):
+            del self.commands[index]
+        else:
+            raise IndexError
